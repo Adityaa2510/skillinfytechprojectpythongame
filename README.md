@@ -30,6 +30,12 @@ GitHub Actions is used to automate testing and security checks. Docker Compose r
 - ⚙️ Docker Compose for multi-container orchestration
 - 🚀 GitHub Actions CI/CD workflow
 
+
+## 🏗️ Architecture & Workflow
+
+![Snake Arena CI/CD and DevSecOps Workflow](docs/snake-arena-workflow.png)
+
+
 ## 🏗️ Architecture
 
 ```text
