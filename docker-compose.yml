@@ -1,7 +1,13 @@
 services:
   api1:
     build: .
-    command: ["python", "api.py"]
+    command:
+      - gunicorn
+      - --bind
+      - 0.0.0.0:5000
+      - --workers
+      - "2"
+      - api:app
     environment:
       INSTANCE_ID: "api-replica-1"
     expose:
@@ -10,7 +16,13 @@ services:
 
   api2:
     build: .
-    command: ["python", "api.py"]
+    command:
+      - gunicorn
+      - --bind
+      - 0.0.0.0:5000
+      - --workers
+      - "2"
+      - api:app
     environment:
       INSTANCE_ID: "api-replica-2"
     expose:
