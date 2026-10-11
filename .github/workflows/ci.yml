@@ -1,4 +1,3 @@
-
 name: Snake Arena DevSecOps
 
 on:
@@ -78,3 +77,38 @@ jobs:
             -v "$GITHUB_WORKSPACE:/repo" \
             zricethezav/gitleaks:v8.24.2 \
             detect --source=/repo --redact --exit-code=1
+
+  build-test-deploy:
+    name: Build, Test & Deploy
+    runs-on: ubuntu-latest
+    needs: [tests, sast, dependency-audit, secret-scan]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t snake-arena:${{ github.sha }} .
+
+      - name: Test inside Docker
+        run: docker run --rm snake-arena:${{ github.sha }} python -m pytest -v
+
+      - name: Container smoke test
+        run: docker run --rm snake-arena:${{ github.sha }} python -c "import pygame, game_logic; print('Container OK')"
+
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy image to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          docker tag snake-arena:${{ github.sha }} "$DOCKERHUB_USERNAME/snake-arena:${{ github.sha }}"
+          docker tag snake-arena:${{ github.sha }} "$DOCKERHUB_USERNAME/snake-arena:latest"
+          docker push "$DOCKERHUB_USERNAME/snake-arena:${{ github.sha }}"
+          docker push "$DOCKERHUB_USERNAME/snake-arena:latest"
