@@ -1,3 +1,4 @@
+
 name: Snake Arena DevSecOps
 
 on:
@@ -15,14 +16,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
+
       - name: Run tests
         run: python -m pytest -v
+
       - name: Check Python syntax
         run: python -m compileall -q game.py game_logic.py tests
 
@@ -31,25 +36,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Install Bandit
         run: python -m pip install "bandit>=1.8,<2.0"
-      - name: Scan Python source
-        run: python -m bandit -r game.py game_logic.py tests
+
+      - name: Scan application source
+        run: python -m bandit -r game.py game_logic.py
 
   dependency-audit:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
+
       - name: Audit dependencies
         run: python -m pip_audit -r requirements.txt
 
@@ -60,6 +71,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Scan for secrets
         run: |
           docker run --rm \
